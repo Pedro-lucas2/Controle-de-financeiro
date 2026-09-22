@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Mobile & PWA Metas -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="format-detection" content="telephone=no">
+
+    <title>Controle Financeiro & Meta Customizada</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Personalizados -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-full flex flex-col antialiased">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm safe-top">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-blue-800 text-white rounded-lg shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">FinançasPessoais</h1>
+                    <p class="text-xs text-slate-500 font-medium">Planejamento de Meta & Teto Diário</p>
+                </div>
+            </div>
+
+            <!-- Action buttons header -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Backup & Restore Buttons -->
+                <button id="btn-export" class="px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-150 flex items-center space-x-1.5 border border-slate-200 touch-manipulation select-none" title="Exportar dados para um arquivo JSON">
+                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    <span class="hidden sm:inline">Exportar</span>
+                </button>
+
+                <button id="btn-import-trigger" class="px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-150 flex items-center space-x-1.5 border border-slate-200 touch-manipulation select-none" title="Importar dados de um arquivo JSON">
+                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span class="hidden sm:inline">Importar</span>
+                </button>
+                <input type="file" id="file-import" accept=".json" class="hidden">
+
+                <button id="btn-config" class="px-3.5 py-2 text-xs sm:text-sm font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 rounded-lg transition-colors duration-150 flex items-center space-x-2 border border-blue-200 touch-manipulation select-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span>Renda & Meta</span>
+                </button>
+
+                <button id="btn-reset" class="p-2 text-slate-400 hover:text-red-600 active:text-red-700 rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-colors touch-manipulation select-none" title="Resetar Todos os Dados">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full space-y-6 sm:space-y-8 safe-bottom">
+        
+        <!-- DAY SIMULATION & NAVIGATION BAR -->
+        <section class="bg-blue-900 text-white rounded-2xl p-4 sm:p-5 shadow-md flex flex-col md:flex-row items-center justify-between gap-4 border border-blue-800">
+            <div class="flex items-center space-x-3 w-full md:w-auto">
+                <div class="p-2.5 bg-blue-800 rounded-xl border border-blue-700 shrink-0">
+                    <svg class="w-6 h-6 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-blue-300">Data Ativa da Aplicação</span>
+                        <span id="badge-simulated" class="hidden px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-700 text-blue-100">Simulação</span>
+                    </div>
+                    <div id="current-simulated-date-display" class="text-xl font-bold tracking-tight text-white">01/01/2026</div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 w-full md:w-auto justify-end">
+                <button id="btn-today" class="px-3 py-2 text-xs font-semibold bg-blue-800 hover:bg-blue-700 active:bg-blue-900 text-blue-100 rounded-lg transition-colors border border-blue-700 flex items-center space-x-1 touch-manipulation select-none">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Ir para Hoje</span>
+                </button>
+                <button id="btn-next-day" class="flex-1 md:flex-none px-4 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-lg shadow-sm transition-all flex items-center justify-center space-x-2 border border-blue-400 touch-manipulation select-none">
+                    <span>Avançar Próximo Dia</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            
+            <!-- Renda Mensal -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-all">
+                <div class="flex items-center justify-between text-slate-500 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Renda Mensal</span>
+                    <div class="p-2 bg-blue-50 text-blue-800 rounded-md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                </div>
+                <div>
+                    <div id="card-income" class="text-2xl font-bold text-slate-900">R$ 0,00</div>
+                    <p class="text-xs text-slate-500 mt-1">Orçamento bruto/líquido</p>
+                </div>
+            </div>
+
+            <!-- Gastos Fixos -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-all">
+                <div class="flex items-center justify-between text-slate-500 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Gastos Fixos</span>
+                    <div class="p-2 bg-slate-100 text-slate-700 rounded-md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    </div>
+                </div>
+                <div>
+                    <div id="card-fixed-total" class="text-2xl font-bold text-slate-900">R$ 0,00</div>
+                    <p class="text-xs text-slate-500 mt-1">Soma de contas recorrentes</p>
+                </div>
+            </div>
+
+            <!-- Meta Customizada (Poupança Mês e Dia) -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-all">
+                <div class="flex items-center justify-between text-slate-500 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Reserva para Meta</span>
+                    <div class="p-2 bg-blue-100 text-blue-800 rounded-md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div>
+                    <div id="card-monthly-savings" class="text-2xl font-bold text-blue-800">R$ 0,00 /mês</div>
+                    <p id="card-daily-savings" class="text-xs text-slate-500 mt-1">Guardar R$ 0,00 por dia</p>
+                </div>
+            </div>
+
+            <!-- Teto Livre Mensal -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-all">
+                <div class="flex items-center justify-between text-slate-500 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Teto Livre Mensal</span>
+                    <div class="p-2 bg-blue-50 text-blue-800 rounded-md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    </div>
+                </div>
+                <div>
+                    <div id="card-spendable-total" class="text-2xl font-bold text-slate-900">R$ 0,00</div>
+                    <p id="card-remaining-spendable" class="text-xs text-slate-500 mt-1">Saldo restante: R$ 0,00</p>
+                </div>
+            </div>
+
+            <!-- Teto Diário Recomendado -->
+            <div id="card-daily-container" class="bg-blue-800 p-5 rounded-xl shadow-sm text-white flex flex-col justify-between relative overflow-hidden transition-colors duration-300">
+                <div class="flex items-center justify-between text-blue-100 mb-2 z-10">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Teto Diário do Mês</span>
+                    <div class="p-2 bg-blue-700/50 rounded-md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                </div>
+                <div class="z-10">
+                    <div id="card-daily-limit" class="text-2xl font-bold">R$ 0,00</div>
+                    <p id="card-daily-subtext" class="text-xs text-blue-100 mt-1">Para os dias restantes no mês</p>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Goal Detail Banner -->
+            <div class="lg:col-span-1 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                        <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Detalhes da Meta Financeira</h2>
+                        <span id="goal-months-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-100">0 Meses</span>
+                    </div>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between items-center text-slate-600">
+                            <span>Valor Total Desejado:</span>
+                            <span id="goal-total-display" class="font-bold text-slate-900">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-slate-600">
+                            <span>Guarda por Mês:</span>
+                            <span id="goal-monthly-display" class="font-bold text-blue-800">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-slate-600">
+                            <span>Equivalente por Dia:</span>
+                            <span id="goal-daily-display" class="font-bold text-slate-800">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100">
+                    <p class="text-xs text-slate-500">O valor mensal necessário é debitado automaticamente do seu teto de gastos livres.</p>
+                </div>
+            </div>
+
+            <!-- Daily & Monthly Progress Bar Section -->
+            <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-900">Monitoramento do Dia Ativo & Mês</h2>
+                        <p class="text-xs text-slate-500">Acompanhamento do uso do limite na data selecionada</p>
+                    </div>
+                    <div id="today-status-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200 self-start sm:self-auto">
+                        Gasto no Dia: R$ 0,00
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Daily Limit Progress -->
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-600">Uso do Teto do Dia Ativo</span>
+                            <span id="daily-progress-text" class="text-blue-800">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                            <div id="daily-progress-bar" class="bg-blue-700 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Spendable Progress -->
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-600">Uso do Teto Livre Mensal</span>
+                            <span id="monthly-progress-text" class="text-blue-800">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                            <div id="monthly-progress-bar" class="bg-blue-700 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+            
+            <!-- Left Column: Quick Entry & Fixed Expenses -->
+            <section class="lg:col-span-1 space-y-6 sm:space-y-8">
+                
+                <!-- LANÇAMENTO RÁPIDO DIÁRIO -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-5">
+                        <div class="p-2 bg-blue-800 text-white rounded-lg shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Lançamento Rápido Diário</h2>
+                            <p class="text-xs text-slate-500">Sem categoria ou descrição obrigatória</p>
+                        </div>
+                    </div>
+
+                    <form id="quick-expense-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Valor do Gasto (R$)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-sm">R$</span>
+                                <input type="number" id="quick-amount" step="0.01" min="0.01" inputmode="decimal" required placeholder="0,00" class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-lg font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Data do Lançamento</label>
+                            <input type="date" id="quick-date" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all">
+                        </div>
+
+                        <button type="submit" class="w-full py-3 px-4 bg-blue-800 hover:bg-blue-900 active:bg-blue-950 text-white font-semibold rounded-lg shadow-sm transition-colors duration-150 flex items-center justify-center space-x-2 touch-manipulation select-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <span>Lançar Gasto</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- GASTOS FIXOS -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="p-2 bg-slate-100 text-slate-800 rounded-lg shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0h4"></path></svg>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Gastos Fixos</h2>
+                                <p class="text-xs text-slate-500">Aluguel, luz, água, internet...</p>
+                            </div>
+                        </div>
+                        <button id="btn-add-fixed" class="p-1.5 bg-blue-50 text-blue-800 hover:bg-blue-100 active:bg-blue-200 rounded-lg transition-colors text-xs font-semibold flex items-center space-x-1 border border-blue-200 touch-manipulation select-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <span>Adicionar</span>
+                        </button>
+                    </div>
+
+                    <!-- Collapsible Fixed Form -->
+                    <form id="fixed-expense-form" class="hidden space-y-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div>
+                            <input type="text" id="fixed-name" required placeholder="Nome (Ex: Aluguel)" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        </div>
+                        <div>
+                            <input type="number" id="fixed-amount" step="0.01" min="0.01" inputmode="decimal" required placeholder="Valor (R$)" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" id="btn-cancel-fixed" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 rounded touch-manipulation">Cancelar</button>
+                            <button type="submit" class="px-3 py-1.5 text-xs text-white bg-blue-800 hover:bg-blue-900 active:bg-blue-950 rounded font-semibold touch-manipulation">Salvar</button>
+                        </div>
+                    </form>
+
+                    <!-- Fixed List -->
+                    <div id="fixed-list" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                        <!-- Dynamic items -->
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-3 flex justify-between items-center text-xs font-semibold">
+                        <span class="text-slate-500">Total Gastos Fixos:</span>
+                        <span id="fixed-expenses-sum" class="text-slate-900">R$ 0,00</span>
+                    </div>
+                </div>
+
+            </section>
+
+            <section class="lg:col-span-2 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <!-- Table Header Controls -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-5">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Histórico de Lançamentos Diários</h2>
+                            <p class="text-xs text-slate-500">Lançamentos acumulados no sistema</p>
+                        </div>
+
+                        <!-- Date Filter -->
+                        <div class="flex items-center space-x-2 w-full sm:w-auto justify-between sm:justify-start">
+                            <label class="text-xs font-medium text-slate-500 shrink-0">Filtrar Data:</label>
+                            <input type="date" id="filter-date" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 flex-1 sm:flex-none">
+                            <button id="btn-clear-filter" class="px-2.5 py-1.5 text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors touch-manipulation">Limpar</button>
+                        </div>
+                    </div>
+
+                    <!-- History Table -->
+                    <div class="overflow-x-auto -mx-2 sm:mx-0">
+                        <table class="w-full text-left text-xs text-slate-600 min-w-[340px]">
+                            <thead class="bg-slate-50 border-y border-slate-200 text-slate-700 font-semibold uppercase tracking-wider">
+                                <tr>
+                                    <th class="py-3 px-3">Data</th>
+                                    <th class="py-3 px-3">Status em Relação ao Teto</th>
+                                    <th class="py-3 px-3 text-right">Valor Lançado</th>
+                                    <th class="py-3 px-3 text-center">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="daily-transactions-body" class="divide-y divide-slate-100">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+
+                        <!-- Empty state -->
+                        <div id="empty-state" class="hidden py-12 text-center">
+                            <div class="inline-flex p-3 bg-slate-100 text-slate-400 rounded-full mb-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <p class="text-sm font-medium text-slate-700">Nenhum gasto registrado</p>
+                            <p class="text-xs text-slate-400 mt-1">Utilize o painel de lançamento diário para inserir novos valores.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Summary Info -->
+                <div class="border-t border-slate-100 pt-4 mt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500">
+                    <span id="daily-count">0 lançamentos exibidos</span>
+                    <span id="daily-total" class="font-semibold text-slate-800">Total Exibido: R$ 0,00</span>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- MODAL: Ajustar Renda Mensal e Meta Customizada -->
+    <div id="budget-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-5 sm:p-6 space-y-5 my-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-blue-50 text-blue-800 rounded-lg shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Configurar Renda e Meta Customizada</h3>
+                </div>
+                <button id="modal-close" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-md touch-manipulation">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form id="budget-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Renda Mensal (R$)</label>
+                    <input type="number" id="input-income" step="0.01" min="0" inputmode="decimal" required placeholder="Ex: 5000,00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <p class="text-xs text-slate-400 mt-1">Sua receita mensal total disponível.</p>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Valor Total da Meta Financeira (R$)</label>
+                    <input type="number" id="input-goal-total" step="0.01" min="0" inputmode="decimal" required placeholder="Ex: 12000,00" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <p class="text-xs text-slate-400 mt-1">O valor total acumulado que você quer juntar.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Prazo para Guardar (Nº de Meses)</label>
+                    <input type="number" id="input-goal-months" step="1" min="1" max="120" inputmode="numeric" required placeholder="Ex: 12" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <p class="text-xs text-slate-400 mt-1">Em quantos meses deseja alcançar esse objetivo?</p>
+                </div>
+
+                <!-- Dynamic Calculation Preview inside Modal -->
+                <div class="p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs space-y-1 text-slate-700">
+                    <div class="flex justify-between">
+                        <span>Reserva Mês:</span>
+                        <strong id="modal-preview-monthly" class="text-blue-800">R$ 0,00</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Reserva Dia (Base 30 dias):</span>
+                        <strong id="modal-preview-daily" class="text-slate-800">R$ 0,00</strong>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end space-x-3">
+                    <button type="button" id="btn-cancel-modal" class="px-4 py-2.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors touch-manipulation">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-semibold text-white bg-blue-800 hover:bg-blue-900 active:bg-blue-950 rounded-lg transition-colors shadow-sm touch-manipulation">Salvar Orçamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast" class="fixed bottom-5 left-5 right-5 sm:left-auto sm:right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center justify-center sm:justify-start space-x-2">
+        <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span id="toast-message">Notificação</span>
+    </div>
+
+    <!-- Script de Lógica do Sistema -->
+    <script src="script.js"></script>
+</body>
+</html>
