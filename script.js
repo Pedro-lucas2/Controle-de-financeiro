@@ -1,17 +1,14 @@
-// LocalStorage Key
 const STORAGE_KEY = 'FINANCAS_META_CUSTOM_V4';
 
-// Main State
 let appData = {
     income: 0,
     goalTotal: 0,
     goalMonths: 1,
-    simulatedDate: null, // YYYY-MM-DD
-    fixedExpenses: [],   // Array of { id, name, amount }
-    dailyExpenses: []    // Array of { id, amount, date }
+    simulatedDate: null,
+    fixedExpenses: [],
+    dailyExpenses: []
 };
 
-// DOM References
 const modal = document.getElementById('budget-modal');
 const budgetForm = document.getElementById('budget-form');
 const inputIncome = document.getElementById('input-income');
@@ -20,12 +17,10 @@ const inputGoalMonths = document.getElementById('input-goal-months');
 const modalPreviewMonthly = document.getElementById('modal-preview-monthly');
 const modalPreviewDaily = document.getElementById('modal-preview-daily');
 
-// Quick Entry References
 const quickForm = document.getElementById('quick-expense-form');
 const quickAmount = document.getElementById('quick-amount');
 const quickDate = document.getElementById('quick-date');
 
-// Fixed Expense References
 const fixedForm = document.getElementById('fixed-expense-form');
 const fixedName = document.getElementById('fixed-name');
 const fixedAmount = document.getElementById('fixed-amount');
@@ -34,7 +29,6 @@ const btnCancelFixed = document.getElementById('btn-cancel-fixed');
 const fixedListContainer = document.getElementById('fixed-list');
 const fixedExpensesSum = document.getElementById('fixed-expenses-sum');
 
-// Card Displays
 const cardIncome = document.getElementById('card-income');
 const cardFixedTotal = document.getElementById('card-fixed-total');
 const cardMonthlySavings = document.getElementById('card-monthly-savings');
@@ -46,30 +40,25 @@ const cardDailySubtext = document.getElementById('card-daily-subtext');
 const cardDailyContainer = document.getElementById('card-daily-container');
 const todayStatusBadge = document.getElementById('today-status-badge');
 
-// Date Display & Navigation
 const currentSimulatedDateDisplay = document.getElementById('current-simulated-date-display');
 const badgeSimulated = document.getElementById('badge-simulated');
 const btnNextDay = document.getElementById('btn-next-day');
 const btnToday = document.getElementById('btn-today');
 
-// Export/Import
 const btnExport = document.getElementById('btn-export');
 const btnImportTrigger = document.getElementById('btn-import-trigger');
 const fileImportInput = document.getElementById('file-import');
 
-// Goal Banner Elements
 const goalTotalDisplay = document.getElementById('goal-total-display');
 const goalMonthlyDisplay = document.getElementById('goal-monthly-display');
 const goalDailyDisplay = document.getElementById('goal-daily-display');
 const goalMonthsBadge = document.getElementById('goal-months-badge');
 
-// Progress Indicators
 const dailyProgressBar = document.getElementById('daily-progress-bar');
 const dailyProgressText = document.getElementById('daily-progress-text');
 const monthlyProgressBar = document.getElementById('monthly-progress-bar');
 const monthlyProgressText = document.getElementById('monthly-progress-text');
 
-// History Table Elements
 const dailyTransactionsBody = document.getElementById('daily-transactions-body');
 const emptyState = document.getElementById('empty-state');
 const dailyCount = document.getElementById('daily-count');
@@ -77,7 +66,6 @@ const dailyTotal = document.getElementById('daily-total');
 const filterDateInput = document.getElementById('filter-date');
 const btnClearFilter = document.getElementById('btn-clear-filter');
 
-// --- UTILITY FUNCTIONS ---
 function formatCurrency(val) {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
 }
@@ -157,52 +145,36 @@ function calculateMetrics() {
     const monthlySavings = goalTotal / months;
     const dailySavings = goalTotal / (months * 30);
 
-    // Teto disponível para gastar no mês inteiro após fixos e reserva para meta
     const spendableTotal = Math.max(0, appData.income - totalFixed - monthlySavings);
 
-    // Mês e ano da data ativa na aplicação
     const activeDateStr = getActiveDateString();
     const activeDateObj = parseDateString(activeDateStr);
     const activeYear = activeDateObj.getFullYear();
     const activeMonth = activeDateObj.getMonth();
 
-    // Quantidade de dias no mês atual e o dia selecionado
     const daysInMonth = new Date(activeYear, activeMonth + 1, 0).getDate();
     const currentDay = activeDateObj.getDate();
 
-    // Cota base padrão por dia
     const baseDailyLimit = spendableTotal > 0 ? (spendableTotal / daysInMonth) : 0;
 
-    // CÁLCULO SEQUENCIAL DIA A DIA (Do dia 1 até o dia selecionado)
-    // Isso garante que se um dia estourar, o limite do dia seguinte já começa menor.
-    let currentLimit = baseDailyLimit;
-    let accumulatedBalance = 0; // Saldo vindo de dias anteriores (pode ser positivo ou negativo)
+    let accumulatedBalance = 0;
 
     for (let day = 1; day < currentDay; day++) {
         const dateString = `${activeYear}-${String(activeMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         
-        // Quanto foi gastinho no dia 'day'
         const spentOnDay = appData.dailyExpenses
             .filter(exp => exp.date === dateString)
             .reduce((acc, exp) => acc + exp.amount, 0);
 
-        // O saldo que sobra (positivo) ou que faltou (negativo) neste dia
-        const dayDifference = currentLimit - spentOnDay;
-
-        // O novo limite do dia seguinte será a Cota Base + Todo o Saldo Acumulado
         accumulatedBalance += (baseDailyLimit - spentOnDay);
-        currentLimit = baseDailyLimit + accumulatedBalance;
     }
 
-    // Limite calculado especificamente para O DIA ATUAL (Pode ser 0 se estourou muito)
-    const todayAvailableLimit = Math.max(0, baseDailyLimit + accumulatedBalance);
+    const todayAvailableLimit = baseDailyLimit + accumulatedBalance;
 
-    // Gastos reais feitos no dia ativo selecionado
     const activeDaySpent = appData.dailyExpenses
         .filter(exp => exp.date === activeDateStr)
         .reduce((acc, exp) => acc + exp.amount, 0);
 
-    // Gastos acumulados no mês inteiro
     const monthlyDailyExpenses = appData.dailyExpenses.filter(item => {
         const itemDate = parseDateString(item.date);
         return itemDate.getFullYear() === activeYear && itemDate.getMonth() === activeMonth;
@@ -227,89 +199,10 @@ function calculateMetrics() {
         activeDateStr
     };
 }
-function calculateMetrics() {
-    const totalFixed = appData.fixedExpenses.reduce((acc, item) => acc + item.amount, 0);
 
-    const months = Math.max(1, parseInt(appData.goalMonths) || 1);
-    const goalTotal = Math.max(0, parseFloat(appData.goalTotal) || 0);
-    
-    const monthlySavings = goalTotal / months;
-    const dailySavings = goalTotal / (months * 30);
-
-    // Teto disponível para gastar no mês inteiro após fixos e reserva para meta
-    const spendableTotal = Math.max(0, appData.income - totalFixed - monthlySavings);
-
-    // Mês e ano da data ativa na aplicação
-    const activeDateStr = getActiveDateString();
-    const activeDateObj = parseDateString(activeDateStr);
-    const activeYear = activeDateObj.getFullYear();
-    const activeMonth = activeDateObj.getMonth();
-
-    // Quantidade de dias no mês atual e o dia selecionado
-    const daysInMonth = new Date(activeYear, activeMonth + 1, 0).getDate();
-    const currentDay = activeDateObj.getDate();
-
-    // Cota base padrão por dia
-    const baseDailyLimit = spendableTotal > 0 ? (spendableTotal / daysInMonth) : 0;
-
-    // CÁLCULO SEQUENCIAL DIA A DIA (Do dia 1 até o dia selecionado)
-    // Isso garante que se um dia estourar, o limite do dia seguinte já começa menor.
-    let currentLimit = baseDailyLimit;
-    let accumulatedBalance = 0; // Saldo vindo de dias anteriores (pode ser positivo ou negativo)
-
-    for (let day = 1; day < currentDay; day++) {
-        const dateString = `${activeYear}-${String(activeMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        
-        // Quanto foi gastinho no dia 'day'
-        const spentOnDay = appData.dailyExpenses
-            .filter(exp => exp.date === dateString)
-            .reduce((acc, exp) => acc + exp.amount, 0);
-
-        // O saldo que sobra (positivo) ou que faltou (negativo) neste dia
-        const dayDifference = currentLimit - spentOnDay;
-
-        // O novo limite do dia seguinte será a Cota Base + Todo o Saldo Acumulado
-        accumulatedBalance += (baseDailyLimit - spentOnDay);
-        currentLimit = baseDailyLimit + accumulatedBalance;
-    }
-
-    // Limite calculado especificamente para O DIA ATUAL (Pode ser 0 se estourou muito)
-    const todayAvailableLimit = Math.max(0, baseDailyLimit + accumulatedBalance);
-
-    // Gastos reais feitos no dia ativo selecionado
-    const activeDaySpent = appData.dailyExpenses
-        .filter(exp => exp.date === activeDateStr)
-        .reduce((acc, exp) => acc + exp.amount, 0);
-
-    // Gastos acumulados no mês inteiro
-    const monthlyDailyExpenses = appData.dailyExpenses.filter(item => {
-        const itemDate = parseDateString(item.date);
-        return itemDate.getFullYear() === activeYear && itemDate.getMonth() === activeMonth;
-    });
-    const totalDailySpentMonth = monthlyDailyExpenses.reduce((acc, item) => acc + item.amount, 0);
-    const remainingSpendable = spendableTotal - totalDailySpentMonth;
-
-    return {
-        totalFixed,
-        goalTotal,
-        months,
-        monthlySavings,
-        dailySavings,
-        spendableTotal,
-        totalDailySpentMonth,
-        remainingSpendable,
-        daysInMonth,
-        baseDailyLimit,
-        todayAvailableLimit,
-        accumulatedBalance,
-        activeDaySpent,
-        activeDateStr
-    };
-}
 function updateUI() {
     const metrics = calculateMetrics();
 
-    // Data ativa no topo
     currentSimulatedDateDisplay.textContent = formatDate(metrics.activeDateStr);
     if (metrics.activeDateStr !== getTodayDateString()) {
         badgeSimulated.classList.remove('hidden');
@@ -319,17 +212,14 @@ function updateUI() {
 
     quickDate.value = metrics.activeDateStr;
 
-    // Atualização dos Cards Superiores
     cardIncome.textContent = formatCurrency(appData.income);
     cardFixedTotal.textContent = formatCurrency(metrics.totalFixed);
     cardMonthlySavings.textContent = `${formatCurrency(metrics.monthlySavings)} /mês`;
     cardDailySavings.textContent = `Guardar ${formatCurrency(metrics.dailySavings)} por dia`;
     cardSpendableTotal.textContent = formatCurrency(metrics.spendableTotal);
 
-    // Exibe o Limite DISPONÍVEL para o dia (já com acúmulos ou descontos aplicados)
     cardDailyLimit.textContent = formatCurrency(metrics.todayAvailableLimit);
 
-    // Banners da Meta
     goalTotalDisplay.textContent = formatCurrency(metrics.goalTotal);
     goalMonthlyDisplay.textContent = formatCurrency(metrics.monthlySavings);
     goalDailyDisplay.textContent = formatCurrency(metrics.dailySavings);
@@ -343,7 +233,6 @@ function updateUI() {
         cardRemainingSpendable.className = 'text-xs text-red-600 font-semibold mt-1';
     }
 
-    // Mensagem Explicativa abaixo do limite do dia
     if (metrics.accumulatedBalance > 0) {
         cardDailySubtext.textContent = `+ ${formatCurrency(metrics.accumulatedBalance)} acumulados dos dias anteriores`;
     } else if (metrics.accumulatedBalance < 0) {
@@ -352,7 +241,6 @@ function updateUI() {
         cardDailySubtext.textContent = `Cota normal do dia: ${formatCurrency(metrics.baseDailyLimit)}`;
     }
 
-    // Badge de Status e Cor do Card Principal
     if (metrics.activeDaySpent <= metrics.todayAvailableLimit) {
         todayStatusBadge.textContent = `Gasto Hoje: ${formatCurrency(metrics.activeDaySpent)}`;
         todayStatusBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200 self-start sm:self-auto';
@@ -364,13 +252,12 @@ function updateUI() {
         cardDailyContainer.className = 'bg-slate-900 p-5 rounded-xl shadow-sm text-white flex flex-col justify-between relative overflow-hidden transition-colors duration-300';
     }
 
-    // Barra de Progresso do Dia Ativo
     let dailyPercent = metrics.todayAvailableLimit > 0 ? (metrics.activeDaySpent / metrics.todayAvailableLimit) * 100 : 100;
     const displayDailyPercent = Math.round(dailyPercent);
-    dailyProgressBar.style.width = `${Math.min(100, dailyPercent)}%`;
+    dailyProgressBar.style.width = `${Math.min(100, Math.max(0, dailyPercent))}%`;
     dailyProgressText.textContent = `${displayDailyPercent}% do limite disponível hoje`;
 
-    if (dailyPercent > 100 || metrics.todayAvailableLimit === 0) {
+    if (dailyPercent > 100 || metrics.todayAvailableLimit <= 0) {
         dailyProgressBar.className = 'bg-red-500 h-3 rounded-full transition-all duration-500';
         dailyProgressText.className = 'text-red-600 font-bold';
     } else {
@@ -378,7 +265,6 @@ function updateUI() {
         dailyProgressText.className = 'text-blue-800 font-semibold';
     }
 
-    // Barra de Progresso Mensal
     let monthlyPercent = metrics.spendableTotal > 0 ? (metrics.totalDailySpentMonth / metrics.spendableTotal) * 100 : 0;
     const displayMonthlyPercent = Math.min(100, Math.round(monthlyPercent));
     monthlyProgressBar.style.width = `${Math.min(100, monthlyPercent)}%`;
@@ -448,7 +334,7 @@ function renderDailyTransactions() {
                 .filter(e => e.date === item.date)
                 .reduce((acc, e) => acc + e.amount, 0);
 
-            const isOverLimit = metrics.dailyLimit > 0 && daySpentTotal > metrics.dailyLimit;
+            const isOverLimit = metrics.baseDailyLimit > 0 && daySpentTotal > metrics.baseDailyLimit;
 
             tr.innerHTML = `
                 <td class="py-3 px-3 font-medium text-slate-900 whitespace-nowrap">${formatDate(item.date)}</td>
@@ -473,7 +359,6 @@ function renderDailyTransactions() {
     dailyTotal.textContent = `Total Exibido: ${formatCurrency(totalSum)}`;
 }
 
-// Day Navigation Handlers
 btnNextDay.addEventListener('click', () => {
     const currentDateObj = parseDateString(getActiveDateString());
     currentDateObj.setDate(currentDateObj.getDate() + 1);
@@ -495,7 +380,6 @@ btnToday.addEventListener('click', () => {
     showToast('Data retornada para o dia de hoje.');
 });
 
-// Export Data JSON File Handler
 btnExport.addEventListener('click', () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
     const downloadAnchor = document.createElement('a');
@@ -510,7 +394,6 @@ btnExport.addEventListener('click', () => {
     showToast('Histórico baixado com sucesso!');
 });
 
-// Import Data File Handler Trigger
 btnImportTrigger.addEventListener('click', () => {
     fileImportInput.click();
 });
@@ -549,7 +432,6 @@ fileImportInput.addEventListener('change', (e) => {
     fileImportInput.value = '';
 });
 
-// Quick Expense Form Submit
 quickForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const amount = parseFloat(quickAmount.value);
@@ -573,7 +455,6 @@ quickForm.addEventListener('submit', (e) => {
     showToast('Gasto lançado com sucesso.');
 });
 
-// Fixed Expense Form Toggles
 btnAddFixed.addEventListener('click', () => {
     fixedForm.classList.remove('hidden');
     fixedName.focus();
@@ -584,7 +465,6 @@ btnCancelFixed.addEventListener('click', () => {
     fixedForm.reset();
 });
 
-// Fixed Expense Submit
 fixedForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = fixedName.value.trim();
@@ -609,7 +489,6 @@ fixedForm.addEventListener('submit', (e) => {
     showToast('Gasto fixo adicionado.');
 });
 
-// Global Remove Functions
 window.removeFixedExpense = function(id) {
     appData.fixedExpenses = appData.fixedExpenses.filter(i => i.id !== id);
     saveStorage();
@@ -624,7 +503,6 @@ window.removeDailyExpense = function(id) {
     showToast('Lançamento removido.');
 };
 
-// Modal Calculation Preview Live Handler
 function updateModalPreview() {
     const total = parseFloat(inputGoalTotal.value) || 0;
     const months = Math.max(1, parseInt(inputGoalMonths.value) || 1);
@@ -639,7 +517,6 @@ function updateModalPreview() {
 inputGoalTotal.addEventListener('input', updateModalPreview);
 inputGoalMonths.addEventListener('input', updateModalPreview);
 
-// Modal Control Buttons
 document.getElementById('btn-config').addEventListener('click', () => {
     inputIncome.value = appData.income || '';
     inputGoalTotal.value = appData.goalTotal || '';
@@ -652,7 +529,6 @@ const closeModal = () => modal.classList.add('hidden');
 document.getElementById('modal-close').addEventListener('click', closeModal);
 document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
 
-// Fechar modal ao clicar fora no mobile
 modal.addEventListener('click', (e) => {
     if (e.target === modal) {
         closeModal();
@@ -675,7 +551,6 @@ budgetForm.addEventListener('submit', (e) => {
     showToast('Orçamento e meta atualizados.');
 });
 
-// Reset Data Action
 document.getElementById('btn-reset').addEventListener('click', () => {
     if (confirm('Deseja realmente limpar todos os dados do sistema?')) {
         appData = {
@@ -692,14 +567,12 @@ document.getElementById('btn-reset').addEventListener('click', () => {
     }
 });
 
-// Filter Actions
 filterDateInput.addEventListener('change', renderDailyTransactions);
 btnClearFilter.addEventListener('click', () => {
     filterDateInput.value = '';
     renderDailyTransactions();
 });
 
-// Application Initialization
 window.onload = function() {
     loadStorage();
     updateUI();
