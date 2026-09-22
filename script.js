@@ -451,8 +451,14 @@ quickForm.addEventListener('submit', (e) => {
     saveStorage();
     updateUI();
 
+    const metrics = calculateMetrics();
     quickAmount.value = '';
-    showToast('Gasto lançado com sucesso.');
+
+    if (metrics.todayAvailableLimit >= 0) {
+        showToast(`Gasto de ${formatCurrency(amount)} adicionado! Limite restante hoje: ${formatCurrency(metrics.todayAvailableLimit)}`);
+    } else {
+        showToast(`Gasto de ${formatCurrency(amount)} adicionado! Atenção: Teto estourado em ${formatCurrency(Math.abs(metrics.todayAvailableLimit))}`);
+    }
 });
 
 btnAddFixed.addEventListener('click', () => {
