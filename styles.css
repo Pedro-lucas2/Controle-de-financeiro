@@ -54,3 +54,7 @@ select {
 .safe-top {
     padding-top: max(0.5rem, env(safe-area-inset-top));
 }
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}

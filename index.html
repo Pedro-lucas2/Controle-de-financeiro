@@ -44,33 +44,34 @@
 <body class="min-h-full flex flex-col antialiased">
 
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm safe-top">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             
-            <!-- Logo e Título -->
+            <!-- Logo e Título (ocupa toda a largura superior em telas pequenas) -->
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-blue-800 text-white rounded-lg shadow-sm shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <div>
-                    <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-tight">FinançasPessoais</h1>
-                    <p class="text-[11px] sm:text-xs text-slate-500 font-medium">Planejamento de Meta & Teto Diário</p>
+                <div class="min-w-0 flex-1">
+                    <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-snug truncate">FinançasPessoais</h1>
+                    <p class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Planejamento de Meta & Teto Diário</p>
                 </div>
             </div>
 
-            <!-- Botões de Ação do Cabeçalho -->
-            <div class="flex items-center justify-end space-x-1.5 sm:space-x-3 w-full sm:w-auto">
-                <!-- Exportar -->
-                <button id="btn-export" class="p-2 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-150 flex items-center space-x-1.5 border border-slate-200 touch-manipulation select-none" title="Exportar dados">
+            <!-- Ações (Ficam organizadas em linha abaixo do título no mobile) -->
+            <div class="flex items-center justify-between sm:justify-end space-x-1.5 sm:space-x-2 w-full sm:w-auto">
+                
+                <!-- Exportar (Ícone no mobile, texto no desktop) -->
+                <button id="btn-export" class="p-2.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-150 flex items-center justify-center space-x-1.5 border border-slate-200 touch-manipulation select-none" title="Exportar dados">
                     <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                     </svg>
                     <span class="hidden sm:inline">Exportar</span>
                 </button>
 
-                <!-- Importar -->
-                <button id="btn-import-trigger" class="p-2 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-150 flex items-center space-x-1.5 border border-slate-200 touch-manipulation select-none" title="Importar dados">
+                <!-- Importar (Ícone no mobile, texto no desktop) -->
+                <button id="btn-import-trigger" class="p-2.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg transition-colors duration-150 flex items-center justify-center space-x-1.5 border border-slate-200 touch-manipulation select-none" title="Importar dados">
                     <svg class="w-4 h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
@@ -78,8 +79,8 @@
                 </button>
                 <input type="file" id="file-import" accept=".json" class="hidden">
 
-                <!-- Configurações (Renda & Meta) -->
-                <button id="btn-config" class="px-2.5 py-2 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 rounded-lg transition-colors duration-150 flex items-center space-x-1.5 border border-blue-200 touch-manipulation select-none shrink-0">
+                <!-- Botão Renda & Meta (Destaque expansível) -->
+                <button id="btn-config" class="flex-1 sm:flex-initial px-3 py-2 text-xs sm:text-sm font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 rounded-lg transition-colors duration-150 flex items-center justify-center space-x-1.5 border border-blue-200 touch-manipulation select-none">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -88,7 +89,7 @@
                 </button>
 
                 <!-- Resetar -->
-                <button id="btn-reset" class="p-2 text-slate-400 hover:text-red-600 active:text-red-700 rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-colors touch-manipulation select-none shrink-0" title="Resetar Todos os Dados">
+                <button id="btn-reset" class="p-2.5 text-slate-400 hover:text-red-600 active:text-red-700 rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-colors touch-manipulation select-none shrink-0" title="Resetar Todos os Dados">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
