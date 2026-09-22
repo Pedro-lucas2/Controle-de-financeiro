@@ -218,7 +218,8 @@ function updateUI() {
     cardDailySavings.textContent = `Guardar ${formatCurrency(metrics.dailySavings)} por dia`;
     cardSpendableTotal.textContent = formatCurrency(metrics.spendableTotal);
 
-    cardDailyLimit.textContent = formatCurrency(metrics.todayAvailableLimit);
+    const remainingToday = metrics.todayAvailableLimit - metrics.activeDaySpent;
+    cardDailyLimit.textContent = formatCurrency(remainingToday);
 
     goalTotalDisplay.textContent = formatCurrency(metrics.goalTotal);
     goalMonthlyDisplay.textContent = formatCurrency(metrics.monthlySavings);
